@@ -81,6 +81,28 @@
       margin:3px 3px 3px 0; background:#25292d;
     }
 
+    .menu-toggle {
+      position:absolute;
+      left:12px;
+      top:max(58px, calc(env(safe-area-inset-top) + 52px));
+      z-index:8;
+      min-width:48px;
+      min-height:48px;
+      padding:0 14px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:var(--panel);
+      backdrop-filter:blur(14px);
+      color:var(--text);
+      font-weight:800;
+      font-size:14px;
+      box-shadow:var(--shadow);
+      cursor:pointer;
+    }
+    .controls.menu-hidden {
+      display:none;
+    }
+
     .controls {
       position:absolute;
       right:12px;
@@ -269,11 +291,21 @@
       .controls {
         right:8px;
         top:auto;
-        bottom:max(8px, env(safe-area-inset-bottom));
+        bottom:64px;
         transform:none;
         width:min(168px, calc(100vw - 16px));
         gap:6px;
         padding:8px;
+      }
+      .menu-toggle {
+        left:8px;
+        right:auto;
+        top:max(58px, calc(env(safe-area-inset-top) + 50px));
+        bottom:auto;
+        min-width:48px;
+        min-height:48px;
+        padding:0 12px;
+        font-size:13px;
       }
       button.ctrl {
         min-height:38px;
@@ -523,7 +555,9 @@
       </div>
     </section>
 
-    <div class="controls" aria-label="Controale vizualizare">
+    <button type="button" id="menuToggle" class="menu-toggle" aria-expanded="true" aria-controls="viewerControls">Ascunde</button>
+
+    <div class="controls" id="viewerControls" aria-label="Controale vizualizare">
       <button type="button" class="ctrl active" data-view="iso">3D</button>
       <button type="button" class="ctrl" data-view="top">De sus</button>
       <button type="button" class="ctrl" data-view="front">Față</button>
@@ -553,6 +587,8 @@
     const toggleRooms = document.getElementById("toggleRooms");
     const toggleDims = document.getElementById("toggleDims");
     const editRoomNames = document.getElementById("editRoomNames");
+    const menuToggle = document.getElementById("menuToggle");
+    const viewerControls = document.getElementById("viewerControls");
     const roomEditor = document.getElementById("roomEditor");
     const roomEditorRows = document.getElementById("roomEditorRows");
     const saveRoomNames = document.getElementById("saveRoomNames");
@@ -624,6 +660,22 @@
       const hidden = document.body.classList.toggle("hide-wall-dimensions");
       toggleDims.classList.toggle("active", !hidden);
     });
+
+    function setMenuVisible(visible) {
+      viewerControls.classList.toggle("menu-hidden", !visible);
+      menuToggle.setAttribute("aria-expanded", visible ? "true" : "false");
+      menuToggle.textContent = visible ? "Ascunde" : "Meniu";
+    }
+
+    menuToggle.addEventListener("click", () => {
+      const visible = viewerControls.classList.contains("menu-hidden");
+      setMenuVisible(visible);
+    });
+
+    // On small screens, start with controls hidden so they don't cover the model.
+    if (window.matchMedia("(max-width: 620px)").matches) {
+      setMenuVisible(false);
+    }
 
     const roomHotspots = [...document.querySelectorAll(".hotspot-room")];
     const defaultRoomNames = roomHotspots.map(h => h.querySelector(".room-name").textContent.trim());
